@@ -1,0 +1,157 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "quanta-ui-kit": {
+      "projectType": "library",
+      "root": "projects/quanta-ui-kit",
+      "sourceRoot": "projects/quanta-ui-kit/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/quanta-ui-kit/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/quanta-ui-kit/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/quanta-ui-kit/tsconfig.spec.json"
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": "projects/quanta-ui-kit/.storybook",
+            "browserTarget": "quanta-ui-kit:build",
+            "compodoc": true,
+            "compodocArgs": [
+              "-e",
+              "json",
+              "-d",
+              "projects/quanta-ui-kit"
+            ],
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": "projects/quanta-ui-kit/.storybook",
+            "browserTarget": "quanta-ui-kit:build",
+            "compodoc": true,
+            "compodocArgs": [
+              "-e",
+              "json",
+              "-d",
+              "projects/quanta-ui-kit"
+            ],
+            "outputDir": "dist/storybook/quanta-ui-kit"
+          }
+        }
+      }
+    },
+    "quanta-ui-kit-docs": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/quanta-ui-kit-docs",
+      "sourceRoot": "projects/quanta-ui-kit-docs/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/quanta-ui-kit-docs/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/quanta-ui-kit-docs/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/quanta-ui-kit-docs/public"
+              }
+            ],
+            "styles": [
+              "projects/quanta-ui-kit-docs/src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "quanta-ui-kit-docs:build:production"
+            },
+            "development": {
+              "buildTarget": "quanta-ui-kit-docs:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/quanta-ui-kit-docs/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/quanta-ui-kit-docs/public"
+              }
+            ],
+            "styles": [
+              "projects/quanta-ui-kit-docs/src/styles.scss"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "416f1ef5-94cf-4044-bfbf-ad3638bff056"
+  }
+}
