@@ -1,0 +1,60 @@
+# .github/workflows/sync-from-gitlab.yml
+
+name: Sync from GitLab
+
+on:
+  # Run the workflow twice a day (at 00:00 and 12:00 UTC)
+  schedule:
+    - cron: '0 0,12 * * *'
+  
+  # Allow running this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    # Grant permissions to write to repository contents and workflows
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+      - name: Set up Git repository
+        env:
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+          GITLAB_REPO_URL: ${{ secrets.GITLAB_REPO_URL }}
+        run: |
+          # Verify required secrets are set
+          if [ -z "$GITLAB_PAT" ]; then
+            echo "Error: GITLAB_PAT secret is not set"
+            exit 1
+          fi
+          
+          if [ -z "$GITLAB_REPO_URL" ]; then
+            echo "Error: GITLAB_REPO_URL secret is not set"
+            echo "Please set it to: gitlab.com/your-username/quanta-kit-angular.git"
+            exit 1
+          fi
+          
+          # Construct the authenticated GitHub repository URL
+          GITHUB_REPO_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+
+          # Strip https:// or http:// from GitLab URL if present
+          GITLAB_HOST="${GITLAB_REPO_URL#https://}"
+          GITLAB_HOST="${GITLAB_HOST#http://}"
+          
+          echo "Cloning from GitLab: ${GITLAB_HOST}"
+          
+          # Create a bare clone of the GitLab repository using the GitLab PAT
+          git clone --bare "https://oauth2:${GITLAB_PAT}@${GITLAB_HOST}" gitlab-mirror
+          cd gitlab-mirror
+          
+          # Set the push URL to the authenticated GitHub repository URL
+          git remote set-url --push origin "${GITHUB_REPO_URL}"
+          
+          # Push all branches and tags from GitLab to GitHub
+          git push --mirror origin
+
+      - name: Verify push
+        run: echo "Successfully synced from GitLab to GitHub."
